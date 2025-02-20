@@ -398,7 +398,7 @@ class SetCriterion(nn.Module):
             # TODO this should probably be a separate loss, not hacked in this one here
             losses['class_error'] = 100 - accuracy(src_logits[idx], target_classes_o)[0]
         return losses
-
+####Hybrid Dynamic Query Selection Based on IoU-aware####
     def loss_labels_vfl(self, outputs, targets, indices, num_boxes, log=True):
         assert 'pred_boxes' in outputs
         idx = self._get_src_permutation_idx(indices)

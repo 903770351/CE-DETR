@@ -105,8 +105,7 @@ def main_recover(args):
     model, criterion, postprocessors = build_model_main(args)
     model.to(device)
 
-    checkpoint = torch.load(r'E:\download\DINO\logs\DINO\R101-MS5-bifpn(range=1)\checkpoint0017.pth', map_location='cpu')
-    # checkpoint = torch.load(r'E:\download\DINO-main\logs\DINO\gc10-512\checkpoint0016.pth', map_location='cpu')
+    checkpoint = torch.load('', map_location='cpu')
     model.load_state_dict(checkpoint['model'])
     return model
 

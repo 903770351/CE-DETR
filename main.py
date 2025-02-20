@@ -80,12 +80,6 @@ def get_args_parser():
     parser.add_argument("--local_rank", type=int, help='local rank for DistributedDataParallel')
     parser.add_argument('--amp', action='store_true',
                         help="Train with mixed precision")
-
-    # hybrid branch
-    # parser.add_argument("--k_one2many", default=0, type=int)
-    # parser.add_argument("--lambda_one2many", default=1, type=float)
-    # parser.add_argument('--num_queries_one2one', default=500, type=int)
-    # parser.add_argument('--num_queries_one2many', default=0, type=int)
     parser.add_argument('--num_queries', default=500, type=int)
     return parser
 
@@ -98,7 +92,7 @@ def build_model_main(args):
     model, criterion, postprocessors = build_func(args)
     return model, criterion, postprocessors
 
-
+####Co-training encoder####
 def main_recover(args):
     utils.init_distributed_mode(args)
     device = torch.device(args.device)
@@ -304,16 +298,13 @@ def main(args):
     print("Start training")
     start_time = time.time()
     best_map_holder = BestMetricHolder(use_ema=args.use_ema)
-######################################
-    # from deformable.main import main_deformable
-    # recover_model = main_deformable()
+####Co-training encoder####
     # recover_model = None
-
     recover_model = main_deformable(args)
-#####################################
+
     for epoch in range(args.start_epoch, args.epochs):
         # is_recover = False
-        if 0 <= epoch < 6:
+        if 0 <= epoch < 8:
             is_recover = True
         else:
             is_recover = False

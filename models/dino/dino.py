@@ -187,6 +187,7 @@ class DINO(nn.Module):
             for layer in self.transformer.decoder.layers:
                 layer.label_embedding = None
             self.label_embedding = None
+        ####bifpn####
         self.bifpn = nn.Sequential(
             *[BiFPN(256,
                     [256, 256, 256],
@@ -271,7 +272,7 @@ class DINO(nn.Module):
                 srcs.append(src)
                 masks.append(mask)
                 poss.append(pos_l)
-
+        ####bifpn####
         srcs = self.bifpn(srcs)
 
         if self.dn_number > 0 or targets is not None:
@@ -285,33 +286,9 @@ class DINO(nn.Module):
 
         hs, reference, hs_enc, ref_enc, init_box_proposal, restored_srcs = self.transformer(srcs, masks, input_query_bbox, poss, input_query_label,attn_mask,
                                                                              is_recover)
-        # In case num object=0
         hs[0] += self.label_enc.weight[0, 0]*0.0
 
-        # deformable-detr-like anchor update
-        # reference_before_sigmoid = inverse_sigmoid(reference[:-1]) # n_dec, bs, nq, 4
         outputs_coord_list = []
-        # outputs_classes_one2one = []
-        # outputs_coords_one2one = []
-        # outputs_classes_one2many = []
-        # outputs_coords_one2many = []
-        # for dec_lid, (layer_ref_sig, layer_bbox_embed, layer_hs) in enumerate(zip(reference[:-1], self.bbox_embed, hs)):
-        #     layer_delta_unsig = layer_bbox_embed(layer_hs)
-        #     layer_outputs_unsig = layer_delta_unsig  + inverse_sigmoid(layer_ref_sig)
-        #     layer_outputs_unsig = layer_outputs_unsig.sigmoid()
-        #     outputs_coords_one2one.append(layer_outputs_unsig[:, 0: self.num_queries_one2one])
-        #     outputs_coords_one2many.append(layer_outputs_unsig[:, self.num_queries_one2one:])
-        #
-        # for layer_cls_embed, layer_hs in zip(self.class_embed, hs):
-        #     outputs_class = layer_cls_embed(layer_hs)
-        #
-        #     outputs_classes_one2one.append(outputs_class[:, 0: self.num_queries_one2one])
-        #     outputs_classes_one2many.append(outputs_class[:, self.num_queries_one2one:])
-        #
-        # outputs_classes_one2one = torch.stack(outputs_classes_one2one)
-        # outputs_coords_one2one = torch.stack(outputs_coords_one2one)
-        # outputs_classes_one2many = torch.stack(outputs_classes_one2many)
-        # outputs_coords_one2many = torch.stack(outputs_coords_one2many)
         for dec_lid, (layer_ref_sig, layer_bbox_embed, layer_hs) in enumerate(zip(reference[:-1], self.bbox_embed, hs)):
             layer_delta_unsig = layer_bbox_embed(layer_hs)
             layer_outputs_unsig = layer_delta_unsig  + inverse_sigmoid(layer_ref_sig)

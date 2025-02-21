@@ -45,7 +45,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-
+############co-training encoder########################
         with torch.cuda.amp.autocast(enabled=args.amp):
             if is_recover:
                 outputs, outputs_features = model(samples, targets, is_recover)
@@ -53,8 +53,6 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                 with torch.no_grad():
                     recover_outputs, recover_features = recover_model(samples, targets, is_recover)
 
-                # 计算特征的相似度（mse） 另一种方法
-                # my_Loss = torch.nn.MSELoss()
                 my_Loss = torch.nn.BCELoss()
                 similarity_all = 0
                 for output_features_i, recover_features_i in zip(outputs_features, recover_features):
@@ -63,11 +61,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     recover_features_i = torch.nn.Sigmoid()(recover_features_i)
                     loss_recover = my_Loss(output_features_i, recover_features_i)
                     loss_recover += loss_recover
-                # loss_recover = my_Loss(outputs_features, recover_features)
 
                 loss_dict = criterion(outputs, targets)
-
-                # loss_dict = criterion(outputs, targets)
                 loss_dict['loss_recover'] = loss_recover
             else:
                 if need_tgt_for_training:
